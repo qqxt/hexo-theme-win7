@@ -1,0 +1,79 @@
+<article class="article-view post-full links-page">
+    <% if (page.title) { %>
+    <h1 class="article-title"><%= page.title %></h1>
+    <% } %>
+
+    <%
+        var friends = theme.friends || {};
+        var groups = friends.groups || [];
+        // 所有友链合并成一个扁平列表，排名不分先后
+        var items = [];
+        groups.forEach(function (g) {
+            (g.items || []).forEach(function (it) { if (it && it.link) items.push(it); });
+        });
+        var defAvatar = url_for('/image/icon/topic/globe.webp');
+    %>
+
+    <% if (friends.intro) { %>
+        <div class="article-content post-content links-intro"><%- friends.intro %></div>
+    <% } %>
+
+    <% if (items.length === 0) { %>
+        <p class="links-empty">还没有添加友情链接。在 <code>themes/win7/_config.yml</code> 的 <code>friends.groups</code> 里配置即可。</p>
+    <% } else { %>
+        <ul class="links-grid">
+            <% items.forEach(function (item) { %>
+                <% var avatar = item.avatar ? url_for(item.avatar) : defAvatar; %>
+                <li class="link-card">
+                    <a href="<%- item.link %>" target="_blank" rel="noopener" title="<%= item.name || item.link %>">
+                        <img class="link-logo" src="<%- avatar %>" alt="" loading="lazy"
+                             onerror="this.src='<%- defAvatar %>'">
+                        <span class="link-name"><%= item.name || item.link %></span>
+                    </a>
+                </li>
+            <% }); %>
+        </ul>
+    <% } %>
+
+    <%
+        var apply = friends.apply || {};
+        var twikoo = apply.twikoo || {};
+        var envId = twikoo.env_id ? String(twikoo.env_id).trim() : '';
+        var region = twikoo.region ? String(twikoo.region).trim() : '';
+        var contact = apply.contact ? String(apply.contact).trim() : '';
+    %>
+    <div class="links-apply">
+        <h2 class="links-apply-title">申请友链</h2>
+        <p class="links-apply-note">
+            想和本站交换友链？直接在下方留言即可，<strong>无需注册、无需登录</strong>。
+            请附上你的<strong>站点名称、地址、Logo 链接</strong>；审核通过后会添加到上方友链墙。
+        </p>
+        <% if (envId) { %>
+            <div id="twikoo-comment" class="twikoo-mount"></div>
+            <script src="<%- url_for('/vendor/twikoo.min.js') %>"></script>
+            <script>
+            (function () {
+                function boot() {
+                    if (typeof twikoo === 'undefined') return;
+                    twikoo.init({
+                        envId: '<%- envId %>',
+                        el: '#twikoo-comment'<%- region ? (",\n                        region: '" + region + "'") : '' %>,
+                        path: '/links/'
+                    });
+                }
+                if (document.readyState === 'loading') {
+                    document.addEventListener('DOMContentLoaded', boot);
+                } else { boot(); }
+            })();
+            </script>
+        <% } else { %>
+            <div class="twikoo-unconfigured">
+                <p>评论区尚未配置完成，暂时无法在线提交。</p>
+                <% if (contact) { %>
+                    <p>你可以直接联系站长申请友链：<strong><%= contact %></strong></p>
+                <% } %>
+                <p class="twikoo-hint">（站长：在 <code>themes/win7/_config.yml</code> 的 <code>friends.apply.twikoo.env_id</code> 填入 Twikoo 后端环境 ID 即可开启在线申请。）</p>
+            </div>
+        <% } %>
+    </div>
+</article>
