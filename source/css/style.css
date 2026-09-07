@@ -1736,14 +1736,19 @@ mark.search-hit {
     .nav-tree summary { padding: 8px 0; font-size: 15px; }
 
     .nav-breadcrumbs { flex-wrap: wrap; }
-    .nav-breadcrumbs li.crumbg.breadcrumbsbg { flex: 0 1 auto; order: 1; min-width: 0; }
-    .nav-breadcrumbs li.crumbg.breadcrumbsbg .crumb { min-width: 0; }
-    .nav-breadcrumbs li.crumbg.breadcrumbsbg .crumb:last-of-type a {
-        max-width: 84px;
+    /* 移动端隐藏装饰性的前进/后退按钮，把宽度让给面包屑，避免文字被挤扁 */
+    .navbutton { display: none; }
+    .nav-breadcrumbs li.crumbg.breadcrumbsbg { flex: 1 1 auto; order: 1; min-width: 0; }
+    .nav-breadcrumbs li.crumbg.breadcrumbsbg .crumb { min-width: 0; overflow: hidden; }
+    .nav-breadcrumbs li.crumbg.breadcrumbsbg .crumb a { min-width: 0; max-width: 160px; }
+    .nav-breadcrumbs li.crumbg.breadcrumbsbg .crumb a span {
+        display: block;
+        max-width: 100%;
         overflow: hidden;
         text-overflow: ellipsis;
         white-space: nowrap;
     }
+    .nav-breadcrumbs li.crumbg.breadcrumbsbg .crumb:last-of-type a { max-width: 84px; }
     .nav-breadcrumbs li.search-box {
         flex: 0 0 auto;
         order: 0;
