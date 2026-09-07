@@ -7,8 +7,59 @@
     <title>
         <% if (page.title) { %><%= page.title %> · <% } %><%= config.title %>
     </title>
-    <% if (config.description) { %>
-        <meta name="description" content="<%= config.description %>">
+<%
+    // SEO：页面级描述/关键词。文章/页面优先取 front-matter 的 description，
+    // 没有则从摘要、正文截取兜底；首页等其他页面回退到全站 description。
+    var seoDesc = '';
+    if (is_post() || is_page()) {
+        if (page.description) {
+            seoDesc = String(page.description);
+        } else if (page.excerpt) {
+            seoDesc = strip_html(page.excerpt).replace(/\s+/g, ' ').trim();
+        } else if (page.content) {
+            seoDesc = strip_html(page.content).replace(/\s+/g, ' ').trim();
+        }
+        seoDesc = seoDesc.slice(0, 150);
+    } else if (config.description) {
+        seoDesc = config.description;
+    }
+    var seoKeywords = '';
+    if (page.keywords) {
+        seoKeywords = Array.isArray(page.keywords) ? page.keywords.join(',') : String(page.keywords);
+    } else if (page.tags && page.tags.length) {
+        seoKeywords = page.tags.map(function (t) { return t.name; }).join(',');
+    }
+    var canonicalUrl = url_for(page.path || '', { absolute: true });
+%>
+    <% if (seoDesc) { %>
+        <meta name="description" content="<%= seoDesc %>">
+    <% } %>
+    <% if (seoKeywords) { %>
+        <meta name="keywords" content="<%= seoKeywords %>">
+    <% } %>
+    <link rel="canonical" href="<%- canonicalUrl %>">
+    <meta property="og:site_name" content="<%= config.title %>">
+    <meta property="og:title" content="<%= page.title ? page.title : config.title %>">
+    <% if (seoDesc) { %>
+        <meta property="og:description" content="<%= seoDesc %>">
+    <% } %>
+    <meta property="og:type" content="<%= is_post() ? 'article' : 'website' %>">
+    <meta property="og:url" content="<%- canonicalUrl %>">
+    <meta property="og:locale" content="zh_CN">
+    <% if (is_post()) { %>
+        <script type="application/ld+json">
+<%- JSON.stringify({
+    '@context': 'https://schema.org',
+    '@type': 'Article',
+    headline: page.title,
+    description: seoDesc,
+    datePublished: date_xml(page.date),
+    dateModified: date_xml(page.updated || page.date),
+    author: { '@type': 'Person', name: config.author },
+    publisher: { '@type': 'Organization', name: config.title },
+    mainEntityOfPage: { '@type': 'WebPage', '@id': canonicalUrl }
+}) %>
+        </script>
     <% } %>
     <% if (config.feed && config.feed.path) { %>
         <link rel="alternate" type="application/atom+xml" title="<%= config.title %>" href="<%= url_for(config.feed.path) %>">
@@ -98,6 +149,65 @@
     <% if (theme.music && theme.music.enable) { %>
         <script defer src="<%- url_for('js/music.js') %>"></script>
     <% } %>
+
+    <% /* 动态相对时间：前端用 data-date 实时计算，避免静态站“构建后永远几分钟前”的问题。
+          无 JS 时回退到后端 helper 构建时输出的相对时间。 */ %>
+    <script>
+    (function () {
+      var DAY = 86400;
+      function toSeconds(s) {
+        // YYYYMMDDHHmmss -> 秒级时间戳（按本地时间解析，与后端 date helper 一致）
+        if (!s || s.length < 14) return NaN;
+        var y = +s.slice(0, 4), mo = +s.slice(4, 6) - 1, d = +s.slice(6, 8),
+            h = +s.slice(8, 10), mi = +s.slice(10, 12), se = +s.slice(12, 14);
+        return Math.floor(new Date(y, mo, d, h, mi, se).getTime() / 1000);
+      }
+      function startOfDay(ts) { var d = new Date(ts * 1000); d.setHours(0, 0, 0, 0); return Math.floor(d.getTime() / 1000); }
+      function startOfMonth(ts) { var d = new Date(ts * 1000); d.setDate(1); d.setHours(0, 0, 0, 0); return Math.floor(d.getTime() / 1000); }
+      function startOfYear(ts) { var d = new Date(ts * 1000); d.setMonth(0, 1); d.setHours(0, 0, 0, 0); return Math.floor(d.getTime() / 1000); }
+      function relative(ts) {
+        if (isNaN(ts)) return '';
+        var now = Math.floor(Date.now() / 1000);
+        var today = startOfDay(now);
+        var diff = now - ts;
+        if (diff < 60) return '刚刚';
+        if (diff < 3600) return Math.floor(diff / 60) + ' 分钟前';
+        if (diff < DAY) return Math.floor(diff / 3600) + ' 小时前';
+        var td = startOfDay(ts);
+        var n2 = ['昨', '前'];
+        for (var k = 0; k < n2.length; k++) { if (today - DAY * (1 + k) <= td) return n2[k] + '天'; }
+        var week = ['日', '一', '二', '三', '四', '五', '六'];
+        var dow = new Date(now * 1000).getDay(); if (dow === 0) dow = 7;
+        var wStart = today - DAY * dow;
+        var wn = ['', '上'];
+        for (var j = 0; j < wn.length; j++) { if (wStart - DAY * 7 * j < td) return wn[j] + '周' + week[new Date(ts * 1000).getDay()]; }
+        if (wStart - DAY * 14 < td) return '3 周前';
+        var mStart = startOfMonth(now);
+        if (mStart <= td) return Math.floor((today - td) / DAY) + ' 天前';
+        var prev = startOfMonth(mStart - 1);
+        if (prev <= td) return '上月';
+        var yStart = startOfYear(now);
+        if (yStart <= td) return (new Date(now * 1000).getMonth() + 1 - (new Date(ts * 1000).getMonth() + 1)) + ' 月前';
+        var yn = ['去', '前'], yc = yStart;
+        for (var i = 0; i < yn.length; i++) { yc = startOfYear(yc - 1); if (yc <= td) return yn[i] + '年'; }
+        return (new Date(now * 1000).getFullYear() - new Date(ts * 1000).getFullYear()) + ' 年前';
+      }
+      function update() {
+        var els = document.querySelectorAll('.col-date[data-date]');
+        for (var i = 0; i < els.length; i++) {
+          var t = toSeconds(els[i].getAttribute('data-date'));
+          var r = relative(t);
+          if (r) els[i].textContent = r;
+        }
+      }
+      if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', function () { update(); setInterval(update, 60000); });
+      } else {
+        update();
+        setInterval(update, 60000);
+      }
+    })();
+    </script>
 
     <% if (theme.math && theme.math.enable && page.mathjax) { %>
         <script>
