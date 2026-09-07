@@ -49,6 +49,7 @@ hexo.extend.helper.register('relative_time', function (input) {
   const today = startOfDay(now);
 
   let tmp = now - time;
+  if (tmp < 0) return '刚刚'; // 防御：文章时间在未来（如误填），显示"刚刚"而非负数导致的错误
   if (tmp < 60) return '刚刚';
   if (tmp < 3600) return Math.floor(tmp / 60) + ' 分钟前';
   if (tmp < DAY) return Math.floor(tmp / 3600) + ' 小时前';
