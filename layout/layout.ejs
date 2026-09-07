@@ -64,10 +64,10 @@
     <% if (config.feed && config.feed.path) { %>
         <link rel="alternate" type="application/atom+xml" title="<%= config.title %>" href="<%= url_for(config.feed.path) %>">
     <% } %>
-    <%- css('vendor/7.css') %>
-    <%- css('css/style.css') %>
+    <link rel="stylesheet" href="<%- url_for('vendor/7.css') %>?v=<%= asset_version('vendor/7.css') %>">
+    <link rel="stylesheet" href="<%- url_for('css/style.css') %>?v=<%= asset_version('css/style.css') %>">
     <% if (theme.hljs) { %>
-        <%- css('vendor/hljs.css') %>
+        <link rel="stylesheet" href="<%- url_for('vendor/hljs.css') %>?v=<%= asset_version('vendor/hljs.css') %>">
     <% } %>
     <% if (theme.favicon && theme.favicon.enable && theme.favicon.icon) { %>
         <link rel="icon" href="<%= url_for(theme.favicon.icon) %>">
@@ -78,7 +78,7 @@
     <div class="win7-loading" id="win7Loading" aria-hidden="true">
         <div class="win7-spinner" role="status" aria-label="加载中"></div>
     </div>
-    <%- js('js/loading.js') %>
+    <script src="<%- url_for('js/loading.js') %>?v=<%= asset_version('js/loading.js') %>"></script>
 
     <div class="desktop">
         <div class="window main-window glass active">
@@ -145,9 +145,9 @@
     </div>
 
     <script>window.__win7Root = '<%- url_for("/") %>';</script>
-    <script defer src="<%- url_for('js/bundle.js') %>"></script>
+    <script defer src="<%- url_for('js/bundle.js') %>?v=<%= asset_version('js/bundle.js') %>"></script>
     <% if (theme.music && theme.music.enable) { %>
-        <script defer src="<%- url_for('js/music.js') %>"></script>
+        <script defer src="<%- url_for('js/music.js') %>?v=<%= asset_version('js/music.js') %>"></script>
     <% } %>
 
     <% /* 动态相对时间：前端用 data-date 实时计算，避免静态站“构建后永远几分钟前”的问题。
