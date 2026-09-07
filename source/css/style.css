@@ -1736,7 +1736,14 @@ mark.search-hit {
     .nav-tree summary { padding: 8px 0; font-size: 15px; }
 
     .nav-breadcrumbs { flex-wrap: wrap; }
-    .nav-breadcrumbs li.crumbg.breadcrumbsbg { flex: 0 1 auto; order: 1; }
+    .nav-breadcrumbs li.crumbg.breadcrumbsbg { flex: 0 1 auto; order: 1; min-width: 0; }
+    .nav-breadcrumbs li.crumbg.breadcrumbsbg .crumb { min-width: 0; }
+    .nav-breadcrumbs li.crumbg.breadcrumbsbg .crumb:last-of-type a {
+        max-width: 84px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
     .nav-breadcrumbs li.search-box {
         flex: 0 0 auto;
         order: 0;
