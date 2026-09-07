@@ -86,7 +86,7 @@
                 <div class="title-bar-text">
                     <img class="win-icon" src="<%- url_for('/image/icon/vista_pc_1.jpg') %>" alt="">
                     <% if ((is_post() || is_page()) && page.title) { %>
-                        <%= page.title %>----<%= config.title %>
+                        <%= page.title.length > 20 ? page.title.slice(0, 20) + '…' : page.title %>----<%= config.title %>
                     <% } else { %>
                         <%= config.title %><% if (config.subtitle) { %> — <%= config.subtitle %><% } %>
                     <% } %>
@@ -170,6 +170,7 @@
         var now = Math.floor(Date.now() / 1000);
         var today = startOfDay(now);
         var diff = now - ts;
+        if (diff < 0) return '刚刚'; // 防御：文章时间在未来时显示"刚刚"
         if (diff < 60) return '刚刚';
         if (diff < 3600) return Math.floor(diff / 60) + ' 分钟前';
         if (diff < DAY) return Math.floor(diff / 3600) + ' 小时前';

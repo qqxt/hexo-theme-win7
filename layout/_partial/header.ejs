@@ -6,7 +6,7 @@
     else if (is_current('about')) { crumbLabel = '关于'; }
     else if (is_tag()) { crumbLabel = '标签：' + page.tag; }
     else if (is_current('tags')) { crumbLabel = '标签'; }
-    else if (page.title) { crumbLabel = page.title; }
+    else if (page.title) { crumbLabel = page.title.length > 15 ? page.title.slice(0, 15) + '…' : page.title; }
 %>
 <div class="explorer-toolbar">
     <div class="locationbar">
