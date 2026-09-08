@@ -36,7 +36,7 @@
                 <img class="file-ico" src="<%- iconSrc %>" alt="">
                 <a class="file-title" href="<%- url_for(post.path) %>"><%= post.title || 'Untitled' %></a>
             </span>
-            <span class="col-date" data-date="<%= date(post.date, 'YYYYMMDDHHmmss') %>" title="<%= date(post.date, 'YYYY-MM-DD HH:mm') %>">
+            <span class="col-date" data-date="<%= post.date.unix() %>" title="<%= date(post.date, 'YYYY-MM-DD HH:mm') %>">
                 <%= relative_time(post.date) %>
             </span>
             <span class="col-desc">

@@ -72,6 +72,8 @@
     <% if (theme.favicon && theme.favicon.enable && theme.favicon.icon) { %>
         <link rel="icon" href="<%= url_for(theme.favicon.icon) %>">
     <% } %>
+    <!-- Bing 站点所有权验证 meta（Bing Webmaster Tools） -->
+    <meta name="msvalidate.01" content="4B91840282D62109732CCA5559E2F81E" />
 </head>
 
 <body>
@@ -156,11 +158,9 @@
     (function () {
       var DAY = 86400;
       function toSeconds(s) {
-        // YYYYMMDDHHmmss -> 秒级时间戳（按本地时间解析，与后端 date helper 一致）
-        if (!s || s.length < 14) return NaN;
-        var y = +s.slice(0, 4), mo = +s.slice(4, 6) - 1, d = +s.slice(6, 8),
-            h = +s.slice(8, 10), mi = +s.slice(10, 12), se = +s.slice(12, 14);
-        return Math.floor(new Date(y, mo, d, h, mi, se).getTime() / 1000);
+        // s 现在是绝对 Unix 秒字符串（不再按本地时区解析），直接解析，任何时区下结果一致
+        var t = parseInt(s, 10);
+        return isNaN(t) ? NaN : t;
       }
       function startOfDay(ts) { var d = new Date(ts * 1000); d.setHours(0, 0, 0, 0); return Math.floor(d.getTime() / 1000); }
       function startOfMonth(ts) { var d = new Date(ts * 1000); d.setDate(1); d.setHours(0, 0, 0, 0); return Math.floor(d.getTime() / 1000); }
@@ -225,6 +225,17 @@
         </script>
         <script src="<%= url_for(theme.math.local_src) %>" id="MathJax-script" async></script>
     <% } %>
+    <!-- 百度统计（置于 body 末尾并异步加载，避免阻塞首屏渲染） -->
+    <script>
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.async = true;
+      hm.src = "https://hm.baidu.com/hm.js?5b492345c8e832875d67101a1074c999";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+    </script>
 </body>
 
 </html>
