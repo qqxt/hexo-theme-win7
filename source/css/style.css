@@ -1837,3 +1837,17 @@ mark.search-hit {
 @media (prefers-reduced-motion: reduce) {
     * { scroll-behavior: auto !important; }
 }
+
+/* 关键词按钮使用 7.css 的 .btn */
+
+/* 相关文章 / 关键词：统一的 7.css 窗口（两侧留白，不贴边） */
+.win7-widget { width: calc(100% - 32px); margin: 20px 16px; box-sizing: border-box; }
+.win7-widget .window-body { padding: 12px 14px; }
+.post-related .pr-list { margin: 0; padding: 0; list-style: none; display: flex; flex-wrap: wrap; gap: 8px 10px; }
+.post-related .pr-list li { margin: 0; }
+/* 相关文章 / 关键词按钮统一用 7.css 的 .btn 样式 */
+.win7-widget .btn { font-size: 12px; }
+
+/* 上下篇使用原 post-nav 两列宽卡片样式（.post-nav / .post-nav-item） */
+
+/* 上下篇使用原 .post-nav / .post-nav-item 两列宽卡片样式 */

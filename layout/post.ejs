@@ -14,6 +14,26 @@
     <div class="article-content post-content">
         <%- page.content %>
     </div>
+
+    <% if (page.keywords && String(page.keywords).trim()) { %>
+    <div class="post-keywords window glass win7-widget">
+        <div class="title-bar">
+            <div class="title-bar-text">关键词</div>
+            <div class="title-bar-controls">
+                <button aria-label="Minimize"></button>
+                <button aria-label="Maximize"></button>
+                <button aria-label="Close"></button>
+            </div>
+        </div>
+        <div class="window-body">
+            <% (Array.isArray(page.keywords) ? page.keywords : [page.keywords]).forEach(function(k) { %>
+                <% if (k && String(k).trim()) { %>
+                    <button class="btn" onclick="location.href='<%- url_for('/?q=' + encodeURIComponent(String(k).trim())) %>'"><%= String(k).trim() %></button>
+                <% } %>
+            <% }) %>
+        </div>
+    </div>
+    <% } %>
 </article>
 
 <% if (page.prev || page.next) { %>
@@ -35,6 +55,37 @@
         <span class="post-nav-item is-empty"></span>
     <% } %>
 </nav>
+<% } %>
+
+<% if (page.tags && page.tags.length) { %>
+<div class="window glass win7-widget post-related">
+    <div class="title-bar">
+        <div class="title-bar-text">相关文章</div>
+        <div class="title-bar-controls">
+            <button aria-label="Minimize"></button>
+            <button aria-label="Maximize"></button>
+            <button aria-label="Close"></button>
+        </div>
+    </div>
+    <div class="window-body">
+        <ul class="pr-list">
+            <%
+            var related = [];
+            site.posts.forEach(function(p){
+                if (p.path === page.path) return;
+                var hit = false;
+                page.tags.forEach(function(t){
+                    p.tags.forEach(function(pt){ if (pt.name === t.name) hit = true; });
+                });
+                if (hit) related.push(p);
+            });
+            %>
+            <% related.slice(0, 3).forEach(function(p){ %>
+                <li><button class="btn" onclick="location.href='<%- url_for(p.path) %>'"><%= (p.title || '').slice(0, 8) %></button></li>
+            <% }) %>
+        </ul>
+    </div>
+</div>
 <% } %>
 
 <%
